@@ -915,11 +915,11 @@ PlayerSettings:
   captureStartupLogs: {}
   activeInputHandler: 2
   windowsGamepadBackendHint: 0
-  cloudProjectId: 30ab79bb-e75b-4fce-9f78-e15f43c092c9
+  cloudProjectId: 39639b88-2ecc-4cc8-8958-4ad008c2383b
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
   projectName: DeepLayer
-  organizationId: dks66092487
+  organizationId: jaehan210
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
   hmiLoadingImage: {fileID: 0}
