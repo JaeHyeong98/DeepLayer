@@ -317,6 +317,7 @@ namespace StarterAssets
                 {
                     _jumpTimeoutDelta -= Time.deltaTime;
                 }
+                _input.jump = false;
             }
             else
             {
