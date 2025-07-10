@@ -308,7 +308,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!81 &1182399597
 AudioListener:
   m_ObjectHideFlags: 0
@@ -566,7 +566,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2501633038252588098, guid: c57a3b363a3dc394fb6dc7af142e90e4, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3703823791115008154, guid: c57a3b363a3dc394fb6dc7af142e90e4, type: 3}
+      propertyPath: m_Constraints
+      value: 80
       objectReference: {fileID: 0}
     - target: {fileID: 6484331447619581915, guid: c57a3b363a3dc394fb6dc7af142e90e4, type: 3}
       propertyPath: m_LocalPosition.x
@@ -608,7 +612,33 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 7819200622645027371, guid: c57a3b363a3dc394fb6dc7af142e90e4, type: 3}
+      propertyPath: GlobalObjectIdHash
+      value: 893672118
+      objectReference: {fileID: 0}
+    - target: {fileID: 7819200622645027371, guid: c57a3b363a3dc394fb6dc7af142e90e4, type: 3}
+      propertyPath: SceneMigrationSynchronization
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7819200622645027371, guid: c57a3b363a3dc394fb6dc7af142e90e4, type: 3}
+      propertyPath: InScenePlacedSourceGlobalObjectIdHash
+      value: 2438673289
+      objectReference: {fileID: 0}
+    - target: {fileID: 8069380729210659890, guid: c57a3b363a3dc394fb6dc7af142e90e4, type: 3}
+      propertyPath: AuthorityMode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8069380729210659890, guid: c57a3b363a3dc394fb6dc7af142e90e4, type: 3}
+      propertyPath: SyncRotAngleX
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8069380729210659890, guid: c57a3b363a3dc394fb6dc7af142e90e4, type: 3}
+      propertyPath: SyncRotAngleZ
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 6400922681112797869, guid: c57a3b363a3dc394fb6dc7af142e90e4, type: 3}
+    - {fileID: 3703823791115008154, guid: c57a3b363a3dc394fb6dc7af142e90e4, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []

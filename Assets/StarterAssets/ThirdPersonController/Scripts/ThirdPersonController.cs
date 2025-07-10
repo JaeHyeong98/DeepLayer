@@ -1,4 +1,7 @@
-﻿ using UnityEngine;
+﻿using System.Globalization;
+using Unity.Cinemachine;
+using Unity.Netcode;
+using UnityEngine;
 #if ENABLE_INPUT_SYSTEM 
 using UnityEngine.InputSystem;
 #endif
@@ -12,7 +15,7 @@ namespace StarterAssets
 #if ENABLE_INPUT_SYSTEM 
     [RequireComponent(typeof(PlayerInput))]
 #endif
-    public class ThirdPersonController : MonoBehaviour
+    public class ThirdPersonController : NetworkBehaviour
     {
         [Header("Player")]
         [Tooltip("Move speed of the character in m/s")]
@@ -75,6 +78,8 @@ namespace StarterAssets
         [Tooltip("For locking the camera position on all axis")]
         public bool LockCameraPosition = false;
 
+        public CinemachineCamera virtualCam;
+
         // cinemachine
         private float _cinemachineTargetYaw;
         private float _cinemachineTargetPitch;
@@ -130,6 +135,11 @@ namespace StarterAssets
             {
                 _mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
             }
+
+            if(virtualCam == null)
+            {
+                virtualCam = transform.Find("PlayerFollowCamera").GetComponent<CinemachineCamera>();
+            }
         }
 
         private void Start()
@@ -150,10 +160,21 @@ namespace StarterAssets
             // reset our timeouts on start
             _jumpTimeoutDelta = JumpTimeout;
             _fallTimeoutDelta = FallTimeout;
+
+            if (IsOwner)
+            {
+                virtualCam.Priority = 10; // 나만의 시점 활성화
+            }
+            else
+            {
+                virtualCam.Priority = 0;  // 다른 플레이어는 무효화
+            }
         }
 
         private void Update()
         {
+            if (!IsOwner || !IsSpawned) return;
+
             _hasAnimator = TryGetComponent(out _animator);
 
             JumpAndGravity();
@@ -163,6 +184,7 @@ namespace StarterAssets
 
         private void LateUpdate()
         {
+            if (!IsOwner || !IsSpawned) return;
             CameraRotation();
         }
 
@@ -177,6 +199,7 @@ namespace StarterAssets
 
         private void GroundedCheck()
         {
+            if (!IsOwner) return;
             // set sphere position, with offset
             Vector3 spherePosition = new Vector3(transform.position.x, transform.position.y - GroundedOffset,
                 transform.position.z);
@@ -192,6 +215,7 @@ namespace StarterAssets
 
         private void CameraRotation()
         {
+            if (!IsOwner) return;
             // if there is an input and camera position is not fixed
             if (_input.look.sqrMagnitude >= _threshold && !LockCameraPosition)
             {
