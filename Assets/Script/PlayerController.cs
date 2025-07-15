@@ -220,7 +220,7 @@ public class PlayerController : NetworkBehaviour
 
     private void HandleLocalPlayerInput()
     {
-        if (_controller == null || virtualCam != null) return;
+        if (_controller == null || virtualCam == null) return;
 
         // ===== 1. 속도 및 애니메이션 블렌딩 값 계산 =====
         float targetSpeed = _input.sprint ? SprintSpeed : MoveSpeed;
@@ -243,11 +243,10 @@ public class PlayerController : NetworkBehaviour
         _animationBlend = Mathf.Lerp(_animationBlend, targetSpeed, Time.deltaTime * SpeedChangeRate);
         if (_animationBlend < 0.01f) _animationBlend = 0f;
 
-
         // ===== 2. 이동 방향 및 목표 회전 값 계산 (카메라 기준) =====
         Vector2 inputMove = _input.move;
         Vector3 finalMoveDirection = Vector3.zero;
-        float targetRotationY = transform.eulerAngles.y;
+        float targetRotationY = CinemachineCameraTarget.transform.eulerAngles.y;
 
         if (inputMove != Vector2.zero)
         {
@@ -270,7 +269,6 @@ public class PlayerController : NetworkBehaviour
             {
                 finalMoveDirection = Vector3.zero; // 유효한 방향이 아니면 움직이지 않음
             }
-
 
             // 캐릭터 회전 목표값 계산
             _targetRotation = Mathf.Atan2(finalMoveDirection.x, finalMoveDirection.z) * Mathf.Rad2Deg;
@@ -298,7 +296,17 @@ public class PlayerController : NetworkBehaviour
 
     // 서버에서 실제 캐릭터 이동 및 회전 로직을 수행하는 RPC
     [ServerRpc]
-    private void RequestCharacterMoveServerRpc(Vector3 clientPredictedPosition, Quaternion clientPredictedRotation, Vector3 moveDirection, float speed, float verticalVelocity, float animationBlend, float inputMagnitude, bool isGrounded, bool jumpInput)
+    private void RequestCharacterMoveServerRpc(
+        Vector3 clientPredictedPosition, 
+        Quaternion clientPredictedRotation, 
+        Vector3 moveDirection, 
+        float speed, 
+        float verticalVelocity, 
+        float animationBlend, 
+        float inputMagnitude, 
+        bool isGrounded, 
+        bool jumpInput
+        )
     {
         float serverTargetRotationY = transform.eulerAngles.y; // 기본값
         if (moveDirection != Vector3.zero)
@@ -314,24 +322,16 @@ public class PlayerController : NetworkBehaviour
 
         if (_hasAnimator)
         {
-            _animator.SetFloat(_animIDSpeed, _animationBlend);
+            _animator.SetFloat(_animIDSpeed, animationBlend);
             _animator.SetFloat(_animIDMotionSpeed, inputMagnitude);
+            //_animator.SetBool(_animIDJump, jumpInput && isGrounded);
+            //_animator.SetBool(_animIDFreeFall, !isGrounded && verticalVelocity < 0.0f);
         }
     }
-
-    private void AssignAnimationIDs()
-    {
-        _animIDSpeed = Animator.StringToHash("Speed");
-        _animIDGrounded = Animator.StringToHash("Grounded");
-        _animIDJump = Animator.StringToHash("Jump");
-        _animIDFreeFall = Animator.StringToHash("FreeFall");
-        _animIDMotionSpeed = Animator.StringToHash("MotionSpeed");
-    }
-
+    
     private void GroundedCheck()
     {
         if (!IsOwner) return;
-        Debug.Log("GroundedCheck");
         // set sphere position, with offset
         Vector3 spherePosition = new Vector3(transform.position.x, transform.position.y - GroundedOffset,
             transform.position.z);
@@ -437,25 +437,29 @@ public class PlayerController : NetworkBehaviour
         }
     }
 
+    private void OnDrawGizmosSelected()
+    {
+        if (_controller == null) return;
+
+        Gizmos.color = Grounded ? Color.green : Color.red; // Grounded 상태에 따라 색상 변경
+        Vector3 spherePosition = new Vector3(transform.position.x, transform.position.y - GroundedOffset, transform.position.z);
+        Gizmos.DrawWireSphere(spherePosition, GroundedRadius);
+    }
+
+    private void AssignAnimationIDs()
+    {
+        _animIDSpeed = Animator.StringToHash("Speed");
+        _animIDGrounded = Animator.StringToHash("Grounded");
+        _animIDJump = Animator.StringToHash("Jump");
+        _animIDFreeFall = Animator.StringToHash("FreeFall");
+        _animIDMotionSpeed = Animator.StringToHash("MotionSpeed");
+    }
+
     private static float ClampAngle(float lfAngle, float lfMin, float lfMax)
     {
         if (lfAngle < -360f) lfAngle += 360f;
         if (lfAngle > 360f) lfAngle -= 360f;
         return Mathf.Clamp(lfAngle, lfMin, lfMax);
-    }
-
-    private void OnDrawGizmosSelected()
-    {
-        Color transparentGreen = new Color(0.0f, 1.0f, 0.0f, 0.35f);
-        Color transparentRed = new Color(1.0f, 0.0f, 0.0f, 0.35f);
-
-        if (Grounded) Gizmos.color = transparentGreen;
-        else Gizmos.color = transparentRed;
-
-        // when selected, draw a gizmo in the position of, and matching radius of, the grounded collider
-        Gizmos.DrawSphere(
-            new Vector3(transform.position.x, transform.position.y - GroundedOffset, transform.position.z),
-            GroundedRadius);
     }
 
     private void OnFootstep(AnimationEvent animationEvent)

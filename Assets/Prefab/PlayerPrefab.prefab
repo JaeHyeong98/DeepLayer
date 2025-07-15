@@ -1770,7 +1770,6 @@ GameObject:
   - component: {fileID: 966290510576518943}
   - component: {fileID: 5545770877750272257}
   - component: {fileID: 8069380729210659890}
-  - component: {fileID: 1372790291238567805}
   - component: {fileID: 7660785831375783165}
   m_Layer: 0
   m_Name: PlayerPrefab
@@ -1839,7 +1838,7 @@ CharacterController:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Height: 1.8
+  m_Height: 1.9
   m_Radius: 0.28
   m_SlopeLimit: 45
   m_StepOffset: 0.25
@@ -1891,16 +1890,16 @@ MonoBehaviour:
   LandingAudioClip: {fileID: 8300000, guid: ff697d3070687ce4583faa0561a145a2, type: 3}
   FootstepAudioClips: []
   FootstepAudioVolume: 0.5
-  JumpHeight: 1.2
+  JumpHeight: 0.8
   Gravity: -15
   JumpTimeout: 0.5
   FallTimeout: 0.15
   Grounded: 1
-  GroundedOffset: -0.14
+  GroundedOffset: -0.23
   GroundedRadius: 0.28
   GroundLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
   CinemachineCameraTarget: {fileID: 1492941825800369272}
   TopClamp: 70
   BottomClamp: -30
@@ -2019,20 +2018,6 @@ MonoBehaviour:
   SwitchTransformSpaceWhenParented: 0
   Interpolate: 1
   SlerpPosition: 0
---- !u!114 &1372790291238567805
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2501633038252588098}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 455521db0066b4b4280c34d2fdba6763, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
-  Speed: 5
 --- !u!114 &7660785831375783165
 MonoBehaviour:
   m_ObjectHideFlags: 0
