@@ -141,6 +141,11 @@ public class PlayerController : NetworkBehaviour
 
     private void Start()
     {
+        Init();
+    }
+
+    private void Init()
+    {
         _cinemachineTargetYaw = CinemachineCameraTarget.transform.rotation.eulerAngles.y;
 
         _hasAnimator = TryGetComponent(out _animator);
@@ -152,7 +157,6 @@ public class PlayerController : NetworkBehaviour
 			Debug.LogError( "Starter Assets package is missing dependencies. Please use Tools/Starter Assets/Reinstall Dependencies to fix it");
 #endif
 
-
         AssignAnimationIDs();
 
         // reset our timeouts on start
@@ -162,6 +166,7 @@ public class PlayerController : NetworkBehaviour
         if (IsOwner)
         {
             virtualCam.Priority = 10; // 나만의 시점 활성화
+            Debug.Log(transform.name + ", " + OwnerClientId);
         }
         else
         {
@@ -188,6 +193,7 @@ public class PlayerController : NetworkBehaviour
     // NetworkBehaviour를 상속받았으므로 OnNetworkSpawn을 사용
     public override void OnNetworkSpawn()
     {
+        Init();
         // OnNetworkSpawn은 네트워크 오브젝트가 생성될 때 호출됩니다.
         if (!IsOwner)
         {
@@ -220,7 +226,7 @@ public class PlayerController : NetworkBehaviour
 
     private void HandleLocalPlayerInput()
     {
-        if (_controller == null || virtualCam == null) return;
+        if (_controller == null || _mainCamera == null) return;
 
         // ===== 1. 속도 및 애니메이션 블렌딩 값 계산 =====
         float targetSpeed = _input.sprint ? SprintSpeed : MoveSpeed;
@@ -286,6 +292,20 @@ public class PlayerController : NetworkBehaviour
         // Starter Assets은 Update에서 하는 경우도 많으므로 일단 Update 유지
         Vector3 move = finalMoveDirection * (_speed * Time.deltaTime) +
                        new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime;
+
+        Debug.Log($"--- Debugging Move Vector ---");
+        Debug.Log($"Input Move (Vector2): {_input.move}"); // 플레이어 입력 (W,A,S,D)
+        Debug.Log($"Target Speed: {targetSpeed}"); // 목표 속도 (MoveSpeed/SprintSpeed)
+        Debug.Log($"Current Speed (_speed): {_speed}"); // 캐릭터 실제 이동에 사용되는 속도
+        Debug.Log($"Final Move Direction: {finalMoveDirection}"); // 카메라 기준으로 계산된 XZ 이동 방향
+        //Debug.Log($"Vertical Velocity: {_verticalVelocity}"); // 점프/중력에 의한 Y 속도
+        //Debug.Log($"Time.deltaTime: {Time.deltaTime}"); // 프레임 간 시간
+        Debug.Log($"Calculated Move Vector: {move}"); // 최종 CharacterController.Move()에 전달될 벡터
+        Debug.Log($"CharacterController.isGrounded: {_controller.isGrounded}"); // Grounded 상태 (CharacterController 자체의 값)
+        Debug.Log($"Grounded (bool in script): {Grounded}"); // 스크립트에서 관리하는 Grounded 변수
+        Debug.Log($"Input Jump: {_input.jump}"); // 점프 입력 상태
+        Debug.Log($"--- End Debugging Move Vector ---");
+
         _controller.Move(move);
 
         // ===== 4. 서버로 요청 전송 (클라이언트의 현재 상태를 알림) =====
@@ -308,6 +328,10 @@ public class PlayerController : NetworkBehaviour
         bool jumpInput
         )
     {
+        if (_controller == null || _animator == null) return;
+
+        Debug.Log(OwnerClientId+" Rpc");
+
         float serverTargetRotationY = transform.eulerAngles.y; // 기본값
         if (moveDirection != Vector3.zero)
         {
