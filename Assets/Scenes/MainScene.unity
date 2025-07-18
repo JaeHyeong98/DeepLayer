@@ -715,11 +715,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8069380729210659890, guid: c57a3b363a3dc394fb6dc7af142e90e4, type: 3}
       propertyPath: SyncRotAngleX
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8069380729210659890, guid: c57a3b363a3dc394fb6dc7af142e90e4, type: 3}
       propertyPath: SyncRotAngleZ
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 6400922681112797869, guid: c57a3b363a3dc394fb6dc7af142e90e4, type: 3}

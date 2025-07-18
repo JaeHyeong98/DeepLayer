@@ -166,11 +166,13 @@ public class PlayerController : NetworkBehaviour
         if (IsOwner)
         {
             virtualCam.Priority = 10; // 나만의 시점 활성화
+            _playerInput.enabled = true;
             Debug.Log(transform.name + ", " + OwnerClientId);
         }
         else
         {
             virtualCam.Priority = 0;  // 다른 플레이어는 무효화
+            _playerInput.enabled = false;
         }
     }
 
@@ -250,6 +252,7 @@ public class PlayerController : NetworkBehaviour
         if (_animationBlend < 0.01f) _animationBlend = 0f;
 
         // ===== 2. 이동 방향 및 목표 회전 값 계산 (카메라 기준) =====
+        Debug.Log(_input.move);
         Vector2 inputMove = _input.move;
         Vector3 finalMoveDirection = Vector3.zero;
         float targetRotationY = CinemachineCameraTarget.transform.eulerAngles.y;
@@ -293,19 +296,6 @@ public class PlayerController : NetworkBehaviour
         Vector3 move = finalMoveDirection * (_speed * Time.deltaTime) +
                        new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime;
 
-        Debug.Log($"--- Debugging Move Vector ---");
-        Debug.Log($"Input Move (Vector2): {_input.move}"); // 플레이어 입력 (W,A,S,D)
-        Debug.Log($"Target Speed: {targetSpeed}"); // 목표 속도 (MoveSpeed/SprintSpeed)
-        Debug.Log($"Current Speed (_speed): {_speed}"); // 캐릭터 실제 이동에 사용되는 속도
-        Debug.Log($"Final Move Direction: {finalMoveDirection}"); // 카메라 기준으로 계산된 XZ 이동 방향
-        //Debug.Log($"Vertical Velocity: {_verticalVelocity}"); // 점프/중력에 의한 Y 속도
-        //Debug.Log($"Time.deltaTime: {Time.deltaTime}"); // 프레임 간 시간
-        Debug.Log($"Calculated Move Vector: {move}"); // 최종 CharacterController.Move()에 전달될 벡터
-        Debug.Log($"CharacterController.isGrounded: {_controller.isGrounded}"); // Grounded 상태 (CharacterController 자체의 값)
-        Debug.Log($"Grounded (bool in script): {Grounded}"); // 스크립트에서 관리하는 Grounded 변수
-        Debug.Log($"Input Jump: {_input.jump}"); // 점프 입력 상태
-        Debug.Log($"--- End Debugging Move Vector ---");
-
         _controller.Move(move);
 
         // ===== 4. 서버로 요청 전송 (클라이언트의 현재 상태를 알림) =====
@@ -329,8 +319,6 @@ public class PlayerController : NetworkBehaviour
         )
     {
         if (_controller == null || _animator == null) return;
-
-        Debug.Log(OwnerClientId+" Rpc");
 
         float serverTargetRotationY = transform.eulerAngles.y; // 기본값
         if (moveDirection != Vector3.zero)
