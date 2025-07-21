@@ -1,6 +1,7 @@
 using StarterAssets;
 using Unity.Cinemachine;
 using Unity.Netcode;
+using Unity.Services.Authentication;
 using UnityEngine;
 #if ENABLE_INPUT_SYSTEM 
 using UnityEngine.InputSystem;
@@ -100,9 +101,7 @@ public class PlayerController : NetworkBehaviour
     private int _animIDFreeFall;
     private int _animIDMotionSpeed;
 
-#if ENABLE_INPUT_SYSTEM
     private PlayerInput _playerInput;
-#endif
     private Animator _animator;
     private CharacterController _controller;
     private StarterAssetsInputs _input;
@@ -151,11 +150,7 @@ public class PlayerController : NetworkBehaviour
         _hasAnimator = TryGetComponent(out _animator);
         _controller = GetComponent<CharacterController>();
         _input = GetComponent<StarterAssetsInputs>();
-#if ENABLE_INPUT_SYSTEM
         _playerInput = GetComponent<PlayerInput>();
-#else
-			Debug.LogError( "Starter Assets package is missing dependencies. Please use Tools/Starter Assets/Reinstall Dependencies to fix it");
-#endif
 
         AssignAnimationIDs();
 
@@ -167,7 +162,6 @@ public class PlayerController : NetworkBehaviour
         {
             virtualCam.Priority = 10; // 나만의 시점 활성화
             _playerInput.enabled = true;
-            Debug.Log(transform.name + ", " + OwnerClientId);
         }
         else
         {
@@ -221,7 +215,6 @@ public class PlayerController : NetworkBehaviour
                 virtualCam.Follow = transform.Find("PlayerCameraRoot");
                 virtualCam.LookAt = transform.Find("PlayerCameraRoot");
             }
-            Debug.Log($"My Player Spawned: Client ID {OwnerClientId}");
         }
         base.OnNetworkSpawn(); // 부모 OnNetworkSpawn 호출 (중요)
     }
@@ -252,7 +245,6 @@ public class PlayerController : NetworkBehaviour
         if (_animationBlend < 0.01f) _animationBlend = 0f;
 
         // ===== 2. 이동 방향 및 목표 회전 값 계산 (카메라 기준) =====
-        Debug.Log(_input.move);
         Vector2 inputMove = _input.move;
         Vector3 finalMoveDirection = Vector3.zero;
         float targetRotationY = CinemachineCameraTarget.transform.eulerAngles.y;
