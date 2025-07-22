@@ -20,7 +20,9 @@ public class PlayerInfo: MonoBehaviour
 
     [SerializeField]
     private Transform playerUI;
+    private Transform info;
     private Transform toggleGroup;
+    private Transform gatheringKey;
 
     private void Start()
     {
@@ -33,9 +35,13 @@ public class PlayerInfo: MonoBehaviour
         _input = GetComponent<StarterAssetsInputs>();
         _playerInput = GetComponent<PlayerInput>();
         playerUI = transform.Find("PlayerUI");
-        toggleGroup = playerUI.Find("ToggleGroup");
+        info = playerUI.Find("Info");
+        toggleGroup = info.Find("ToggleGroup");
         toggleGroup.GetChild(0).GetComponent<Toggle>().isOn = true;
-        playerUI.gameObject.SetActive(false);
+        gatheringKey = playerUI.Find("GatheringKey");
+
+        info.gameObject.SetActive(false);
+        gatheringKey.gameObject.SetActive(false);
 
         StarterAssetsInputs.OnInfoKey += Info;
     }
@@ -68,5 +74,11 @@ public class PlayerInfo: MonoBehaviour
 
     }
 
-
+    public void GatheringKeyActive(bool val)
+    {
+        if (gatheringKey.gameObject.activeSelf && !val)
+            gatheringKey.gameObject.SetActive(false);
+        else if(!gatheringKey.gameObject.activeSelf && val)
+            gatheringKey.gameObject.SetActive(val);
+    }
 }

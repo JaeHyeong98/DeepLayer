@@ -1,11 +1,10 @@
+using System.Collections;
 using StarterAssets;
 using Unity.Cinemachine;
 using Unity.Netcode;
 using Unity.Services.Authentication;
 using UnityEngine;
-#if ENABLE_INPUT_SYSTEM 
 using UnityEngine.InputSystem;
-#endif
 
 /* Note: animations are called via the controller for both the character and capsule using animator null checks
  */
@@ -78,6 +77,8 @@ public class PlayerController : NetworkBehaviour
 
     public CinemachineCamera virtualCam;
 
+    public LayerMask layerMask;
+
     // cinemachine
     private float _cinemachineTargetYaw;
     private float _cinemachineTargetPitch;
@@ -102,6 +103,7 @@ public class PlayerController : NetworkBehaviour
     private int _animIDMotionSpeed;
 
     private PlayerInput _playerInput;
+    private PlayerInfo _playerInfo;
     private Animator _animator;
     private CharacterController _controller;
     private StarterAssetsInputs _input;
@@ -109,7 +111,10 @@ public class PlayerController : NetworkBehaviour
 
     private const float _threshold = 0.01f;
 
+    private bool isGathering;
     private bool _hasAnimator;
+    private bool isInit;
+    private Coroutine gatheringCo;
 
     private bool IsCurrentDeviceMouse
     {
@@ -145,14 +150,18 @@ public class PlayerController : NetworkBehaviour
 
     private void Init()
     {
+        if (isInit) return;
         _cinemachineTargetYaw = CinemachineCameraTarget.transform.rotation.eulerAngles.y;
 
         _hasAnimator = TryGetComponent(out _animator);
         _controller = GetComponent<CharacterController>();
         _input = GetComponent<StarterAssetsInputs>();
         _playerInput = GetComponent<PlayerInput>();
+        _playerInfo = GetComponent<PlayerInfo>();
 
         AssignAnimationIDs();
+
+        StarterAssetsInputs.OnActionKey += Gathering;
 
         // reset our timeouts on start
         _jumpTimeoutDelta = JumpTimeout;
@@ -168,6 +177,7 @@ public class PlayerController : NetworkBehaviour
             virtualCam.Priority = 0;  // 다른 플레이어는 무효화
             _playerInput.enabled = false;
         }
+        isInit = true;
     }
 
     private void Update()
@@ -175,6 +185,7 @@ public class PlayerController : NetworkBehaviour
         if (IsOwner)
         {
             GroundedCheck();
+            CheckObjectInFront();
             HandleLocalPlayerInput();
             JumpAndGravity();
         }
@@ -287,6 +298,8 @@ public class PlayerController : NetworkBehaviour
         // Starter Assets은 Update에서 하는 경우도 많으므로 일단 Update 유지
         Vector3 move = finalMoveDirection * (_speed * Time.deltaTime) +
                        new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime;
+
+        
 
         _controller.Move(move);
 
@@ -440,6 +453,50 @@ public class PlayerController : NetworkBehaviour
             _verticalVelocity += Gravity * Time.deltaTime;
         }
     }
+
+    private IEnumerator WaitGathering()
+    {
+        _animator.SetBool("Gathering", true);
+        _input.interrupt = true;
+
+        yield return new WaitUntil(() => _animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.99f);
+
+        _animator.SetBool("Gathering", false);
+        _input.interrupt = false;
+        gatheringCo = null;
+        yield break;
+    }
+
+    private void Gathering()
+    {
+        if (!_hasAnimator || !IsOwner || !isGathering) return;
+        
+        if(gatheringCo == null)
+        {
+            gatheringCo = StartCoroutine(WaitGathering());
+        }
+    }
+
+    public GameObject CheckObjectInFront()
+    {
+        RaycastHit hit;
+        // Physics.Raycast(시작점, 방향, out 충돌 정보, 거리, 레이어 마스크)
+        if (Physics.Raycast(_mainCamera.transform.position, _mainCamera.transform.forward, out hit, 7f, layerMask))
+        {
+            // 레이가 특정 레이어의 오브젝트에 맞았다면
+            Debug.Log("Object in front (Raycast): " + hit.collider.gameObject.name);
+            isGathering = true;
+            _playerInfo.GatheringKeyActive(true);
+            return hit.collider.gameObject;
+        }
+        else
+        {
+            isGathering = false;
+            _playerInfo.GatheringKeyActive(false);
+            return null;
+        }
+    }
+
 
     private void OnDrawGizmosSelected()
     {

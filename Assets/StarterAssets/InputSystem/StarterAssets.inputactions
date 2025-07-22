@@ -295,7 +295,7 @@
                     "name": "",
                     "id": "4de8619e-7c39-4721-b101-a82773ac2dc3",
                     "path": "<Keyboard>/e",
-                    "interactions": "",
+                    "interactions": "Press(behavior=2)",
                     "processors": "",
                     "groups": ";KeyboardMouse",
                     "action": "Action",

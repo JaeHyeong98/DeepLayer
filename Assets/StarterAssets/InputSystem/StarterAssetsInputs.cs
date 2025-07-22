@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
+using static UnityEngine.Rendering.DebugUI;
 #endif
 
 namespace StarterAssets
@@ -21,8 +22,24 @@ namespace StarterAssets
 		public InfoState infoState;
 		public bool attack;
 		public bool aim;
+		public bool interrupt
+        {
+            get { return _interrupt; }
+            set
+            {
+                _interrupt = value;
+                if (_interrupt)
+                {
+                    move = Vector2.zero;
+                    jump = false;
+                    sprint = false;
+                }
+            }
+        }
+        private bool _interrupt;
 
-		public static event Action OnInfoKey;
+        public static event Action OnInfoKey;
+		public static event Action OnActionKey;
 
 		[Header("Movement Settings")]
 		public bool analogMovement;
@@ -34,7 +51,7 @@ namespace StarterAssets
 #if ENABLE_INPUT_SYSTEM
 		public void OnMove(InputValue value)
 		{
-			if(!info)
+			if(!info && !interrupt)
 				MoveInput(value.Get<Vector2>());
 		}
 
@@ -48,7 +65,7 @@ namespace StarterAssets
 
 		public void OnJump(InputValue value)
 		{
-			if(!info)
+			if(!info && !interrupt)
 				JumpInput(value.isPressed);
 		}
 
@@ -59,7 +76,7 @@ namespace StarterAssets
 
 		public void OnAction(InputValue value)
 		{
-
+			ActionInput(value.isPressed);
 		}
 		
 		public void OnTalk(InputValue value)
@@ -116,6 +133,12 @@ namespace StarterAssets
 		public void SprintInput(bool newSprintState)
 		{
 			sprint = newSprintState;
+		}
+
+		public void ActionInput(bool newActionState)
+		{
+            action = newActionState;
+            OnActionKey.Invoke();
 		}
 
 		public void InfoSateInfo(bool newInfoState, InfoState state)
