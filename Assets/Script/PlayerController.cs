@@ -1,4 +1,5 @@
 using System.Collections;
+using Mono.Cecil.Cil;
 using StarterAssets;
 using Unity.Cinemachine;
 using Unity.Netcode;
@@ -115,6 +116,7 @@ public class PlayerController : NetworkBehaviour
     private bool _hasAnimator;
     private bool isInit;
     private Coroutine gatheringCo;
+    private Transform gatheringObj;
 
     private bool IsCurrentDeviceMouse
     {
@@ -127,7 +129,6 @@ public class PlayerController : NetworkBehaviour
 #endif
         }
     }
-
 
     private void Awake()
     {
@@ -457,10 +458,11 @@ public class PlayerController : NetworkBehaviour
     private IEnumerator WaitGathering()
     {
         _animator.SetBool("Gathering", true);
+        if (gatheringObj != null)
+            gatheringObj.GetComponent<DropItem>().Gathering();
         _input.interrupt = true;
 
-        yield return new WaitUntil(() => _animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.99f);
-
+        yield return new WaitUntil(() => _animator.GetCurrentAnimatorStateInfo(0).IsName("Gathering") && _animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.95f);
         _animator.SetBool("Gathering", false);
         _input.interrupt = false;
         gatheringCo = null;
@@ -485,12 +487,14 @@ public class PlayerController : NetworkBehaviour
         {
             // 레이가 특정 레이어의 오브젝트에 맞았다면
             Debug.Log("Object in front (Raycast): " + hit.collider.gameObject.name);
+            gatheringObj = hit.collider.transform;
             isGathering = true;
             _playerInfo.GatheringKeyActive(true);
             return hit.collider.gameObject;
         }
         else
         {
+            gatheringObj = null;
             isGathering = false;
             _playerInfo.GatheringKeyActive(false);
             return null;
