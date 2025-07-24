@@ -1,9 +1,7 @@
 using System.Collections;
-using Mono.Cecil.Cil;
 using StarterAssets;
 using Unity.Cinemachine;
 using Unity.Netcode;
-using Unity.Services.Authentication;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -459,7 +457,7 @@ public class PlayerController : NetworkBehaviour
     {
         _animator.SetBool("Gathering", true);
         if (gatheringObj != null)
-            gatheringObj.GetComponent<DropItem>().Gathering();
+            //gatheringObj.GetComponent<DropItem>().Gathering();
         _input.interrupt = true;
 
         yield return new WaitUntil(() => _animator.GetCurrentAnimatorStateInfo(0).IsName("Gathering") && _animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.95f);

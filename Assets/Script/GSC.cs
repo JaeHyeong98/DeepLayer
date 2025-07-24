@@ -1,6 +1,6 @@
 public class GSC : GenericSingletonClass<GSC>
 {
-    public static InputController inputCon;
+    public static PlayerController player;
     public static SceneController sceneCon;
 }
 
