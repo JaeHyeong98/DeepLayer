@@ -3,6 +3,7 @@ using Unity.Netcode;
 
 public class Inventory : NetworkBehaviour
 {
+    [SerializeField]
     public NetworkList<InventoryItem> inventorySlots;
 
     [Header("Inventory Settings")]

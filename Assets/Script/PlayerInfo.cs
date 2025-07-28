@@ -1,5 +1,4 @@
 using StarterAssets;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -23,6 +22,7 @@ public class PlayerInfo: MonoBehaviour
     private Transform info;
     private Transform toggleGroup;
     private Transform gatheringKey;
+    private Transform inventory;
 
     private void Start()
     {
@@ -39,9 +39,11 @@ public class PlayerInfo: MonoBehaviour
         toggleGroup = info.Find("ToggleGroup");
         toggleGroup.GetChild(0).GetComponent<Toggle>().isOn = true;
         gatheringKey = playerUI.Find("GatheringKey");
+        inventory = playerUI.Find("Inventory");
 
         info.gameObject.SetActive(false);
         gatheringKey.gameObject.SetActive(false);
+        inventory.gameObject.SetActive(false);
 
         StarterAssetsInputs.OnInfoKey += Info;
     }
@@ -59,6 +61,7 @@ public class PlayerInfo: MonoBehaviour
                 break;
 
             case InfoState.Inventory:
+                //inventory.gameObject.SetActive(true);
                 toggleGroup.GetChild(2).GetComponent<Toggle>().isOn = true;
                 break;
 
@@ -70,8 +73,17 @@ public class PlayerInfo: MonoBehaviour
                 toggleGroup.GetChild(4).GetComponent<Toggle>().isOn = true;
                 break;
         }
-        playerUI.gameObject.SetActive(_input.info);
-
+        info.gameObject.SetActive(_input.info);
+        if(_input.info)
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+        else
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
     }
 
     public void GatheringKeyActive(bool val)
@@ -80,5 +92,10 @@ public class PlayerInfo: MonoBehaviour
             gatheringKey.gameObject.SetActive(false);
         else if(!gatheringKey.gameObject.activeSelf && val)
             gatheringKey.gameObject.SetActive(val);
+    }
+
+    public void GatheringItem()
+    {
+
     }
 }

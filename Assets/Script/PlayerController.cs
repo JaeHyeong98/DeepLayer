@@ -107,6 +107,7 @@ public class PlayerController : NetworkBehaviour
     private CharacterController _controller;
     private StarterAssetsInputs _input;
     private GameObject _mainCamera;
+    private Inventory _inventory;
 
     private const float _threshold = 0.01f;
 
@@ -115,6 +116,7 @@ public class PlayerController : NetworkBehaviour
     private bool isInit;
     private Coroutine gatheringCo;
     private Transform gatheringObj;
+    private ItemInfo gatheringItemInfo;
 
     private bool IsCurrentDeviceMouse
     {
@@ -157,6 +159,7 @@ public class PlayerController : NetworkBehaviour
         _input = GetComponent<StarterAssetsInputs>();
         _playerInput = GetComponent<PlayerInput>();
         _playerInfo = GetComponent<PlayerInfo>();
+        _inventory = GetComponent<Inventory>();
 
         AssignAnimationIDs();
 
@@ -457,7 +460,11 @@ public class PlayerController : NetworkBehaviour
     {
         _animator.SetBool("Gathering", true);
         if (gatheringObj != null)
-            //gatheringObj.GetComponent<DropItem>().Gathering();
+        {
+            gatheringItemInfo = gatheringObj.GetComponent<Item>().Gathering(this);
+            _inventory.AddItemServerRpc(gatheringItemInfo.itemId, 1);
+            _playerInfo.GatheringItem();
+        }
         _input.interrupt = true;
 
         yield return new WaitUntil(() => _animator.GetCurrentAnimatorStateInfo(0).IsName("Gathering") && _animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.95f);
@@ -498,7 +505,6 @@ public class PlayerController : NetworkBehaviour
             return null;
         }
     }
-
 
     private void OnDrawGizmosSelected()
     {
